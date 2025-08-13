@@ -62,7 +62,7 @@ You can:
 ```sh
 # Clone this repository
 git clone https://github.com/simocoder/emptyshell.git
-cd mtsh
+cd emptyshell
 
 # Build
 cc -std=c11 -Wall -Wextra -O2 -o mtsh mtsh.c
