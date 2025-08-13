@@ -68,7 +68,7 @@ cd emptyshell
 cc -std=c11 -Wall -Wextra -O2 -o mtsh mtsh.c
 ```
 
-Or use `make` if a `Makefile` is provided:
+Or use `make`:
 
 ```sh
 make
@@ -91,12 +91,22 @@ sudo cp mtsh /usr/local/bin/
 Example session:
 ```
 $ ./mtsh
-mtsh> pwd
+                      _             _          _ _ 
+  ___ _ __ ___  _ __ | |_ _   _ ___| |__   ___| | |
+ / _ \ '_ ` _ \| '_ \| __| | | / __| '_ \ / _ \ | |
+|  __/ | | | | | |_) | |_| |_| \__ \ | | |  __/ | |
+ \___|_| |_| |_| .__/ \__|\__, |___/_| |_|\___|_|_|
+               |_|        |___/                    
+ emptyshell — Minimal Teaching Shell v0.1
+ POSIX.1-2008 • Simple • Hackable
+-----------------------------------------------------
+
+> pwd
 /home/user
-mtsh> cd /tmp
-mtsh> ls
+> cd /tmp
+> ls
 example.txt
-mtsh> exit
+> exit
 $
 ```
 
