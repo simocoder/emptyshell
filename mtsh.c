@@ -25,7 +25,11 @@
 // ------------------ Trim trailing '\n' from getline() input ------------------
 static void chomp(char *s) {
     size_t n = strlen(s);
-    if (n && s[n-1] == '\n') s[n-1] = '\0';
+    if (n && s[n-1] == '\n') s[n-1] = '\0'; // If the last character is '\n', replace it with '\0'.
+    // This modifies the input string in place, which is fine here since we own it.
+    // getline() always allocates memory for the line, so we can safely modify it.
+    // This is a common pattern in C to remove trailing newlines from input.
+    // Note: This function assumes the input string is null-terminated, which getline() guarantees. 
 }
 
 // ------------------ Split a line into argv[] by whitespace only (no quotes/escapes yet) ------------------

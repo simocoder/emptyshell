@@ -122,3 +122,7 @@ $
 ## License
 
 MIT — see [LICENSE](LICENSE) for details.
+
+## Blog
+
+[https://www.rebelyaml.com/posts/emptyshell-mtsh-minimal-teaching-shell/](https://www.rebelyaml.com/posts/emptyshell-mtsh-minimal-teaching-shell/)
