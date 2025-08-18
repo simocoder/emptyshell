@@ -15,12 +15,30 @@
 #include <unistd.h>     // fork(), execvp(), chdir()
 #include <sys/wait.h>   // waitpid(), WIFEXITED(), WEXITSTATUS(), WIFSIGNALED(), WTERMSIG()
 #include <errno.h>      // errno variable, error codes for perror()
+#include <fcntl.h>      // open(), O_CREAT, O_WRONLY, O_TRUNC, dup2()
+
 
 // --- Shell configuration constants ---
 // Upper limit on number of arguments we will parse into argv[].
 // Chosen for simplicity; real shells grow argv dynamically.
 // One slot is always kept free for the NULL terminator.
 #define MAX_ARGS 64   // Hard limit to keep things simple
+
+// Helpers for debugging 
+/*
+static void dump_bytes(const char *label, const char *s) {
+    fprintf(stderr, "%s: '", label);
+    for (const unsigned char *p=(const unsigned char*)s; *p; ++p)
+        //fprintf(stderr, "\\x%02X", *p);
+        fprintf(stderr, " %02X", *p);
+    fprintf(stderr, "'  (text: %s)\n", s);
+}
+
+static void debug_tokens(char *argv[]) {
+    fprintf(stderr, "[DBG] tokens:\n");
+    for (int i = 0; argv[i]; ++i) dump_bytes("  arg", argv[i]);
+}
+*/
 
 // ------------------ Trim trailing '\n' from getline() input ------------------
 static void chomp(char *s) {
@@ -77,7 +95,7 @@ int main(void) {
     printf("|  __/ | | | | | |_) | |_| |_| \\__ \\ | | |  __/ | |\n");
     printf(" \\___|_| |_| |_| .__/ \\__|\\__, |___/_| |_|\\___|_|_|\n");
     printf("               |_|        |___/                    \n");
-    printf(" emptyshell — Minimal Teaching Shell v0.1\n");
+    printf(" emptyshell — Minimal Teaching Shell v0.2.0\n");
     printf(" POSIX.1-2008 • Simple • Hackable\n");
     printf("-----------------------------------------------------\n\n");
 
@@ -99,7 +117,17 @@ int main(void) {
 
         // ------------------ Parse input ------------------
         char *argv[MAX_ARGS];
-        int argc = split(line, argv, MAX_ARGS);
+        int argc = split(line, argv, MAX_ARGS); // Split the line into arguments by whitespace.
+        // split() modifies the input line, so argv[] points to parts of the same memory
+        // Note: split() returns the number of arguments parsed, which is stored in argc.
+        // If argc is 0, it means the line was empty or contained only whitespace.
+        // If argc is 1, it means there is only one argument (the command itself).
+        // If argc is greater than 1, it means there are multiple arguments (command + options/arguments).
+        // The last element of argv[] is always NULL, which is required for execvp() to know where the arguments end.
+        // This is a common pattern in C for handling command-line arguments.
+        // Note: We assume the input is well-formed and does not contain more than MAX_ARGS - 1 arguments.
+        // If it does, the last argument will be truncated, but this is a simple shell so we don't handle that case.
+
         if (argc == 0) continue;
 
         // ------------------ Built-in commands ------------------
@@ -124,6 +152,38 @@ int main(void) {
         }
         if (pid == 0) { // We are in the child (new) process
             // Set up signal handling for child process (optional, not implemented here)
+
+            // Redirections (>, <, >>, etc.) go here when implemented 
+            // We will start small with only >  
+            // Check if argv contains ">"
+            for (int i = 0; argv[i] != NULL; i++) {
+                if (strcmp(argv[i], ">") == 0) {
+                    // argv[i] is ">", argv[i+1] is filename
+                    int fd = open(argv[i+1], O_CREAT | O_WRONLY | O_TRUNC, 0644);
+                    if (fd < 0) { 
+                        fprintf(stderr, "mtsh: cannot open %s for writing: ", argv[i+1]);
+                        perror("");   
+                        exit(1);           
+                    }
+
+                    if (dup2(fd, STDOUT_FILENO) < 0) {
+                        perror("mtsh: dup2 stdout"); 
+                        _exit(1);
+                    }
+
+                    close(fd);
+
+                    argv[i] = NULL; // cut off argv so execvp sees only the command
+                    break;
+                }
+            }
+
+
+            // Pipes setup if needed (not implemented in this simple shell, but could be added later)
+
+
+
+
             // ------------------ Execute command ------------------
             // If execvp fails, it will return and we handle the error below
             // Note: execvp searches the PATH environment variable for the command 

@@ -2,3 +2,6 @@ mtsh
 *.o
 *.a
 *.so*
+
+# VS Code settings
+.vscode/
